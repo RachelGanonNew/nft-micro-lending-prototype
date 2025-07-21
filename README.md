@@ -39,5 +39,3 @@ This prototype demonstrates the core of a decentralized micro-lending protocol f
 ## Example Metadata
 See `contracts/sample_metadata.json` for an example of the metadata structure used for each credential NFT.
 
-## Contact
-For questions, contact the project owner. 

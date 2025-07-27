@@ -39,3 +39,34 @@ This prototype demonstrates the core of a decentralized micro-lending protocol f
 ## Example Metadata
 See `contracts/sample_metadata.json` for an example of the metadata structure used for each credential NFT.
 
+---
+
+## Prototype 2: AI-Powered Reputation Oracle
+
+### Overview
+This prototype demonstrates an off-chain AI oracle that analyzes Professional Credential NFTs and updates a user's on-chain reputation score. The score can be queried by other smart contracts (e.g., lending pools) to determine loan terms.
+
+### Components
+- `contracts/ReputationOracle.sol`: On-chain contract for storing and exposing reputation scores.
+- `scripts/update-reputation.js`: Simulates the AI updater, calculates and sets a user's reputation score.
+- `contracts/LendingPoolExample.sol`: Example contract that queries the oracle for a user's score.
+
+### How to Use
+1. **Compile contracts:**
+   ```bash
+   npx hardhat compile
+   ```
+2. **Run the updater script:**
+   ```bash
+   npx hardhat run scripts/update-reputation.js --network localhost
+   ```
+   This will deploy the oracle, set the updater, and update a user's reputation score.
+3. **Integrate in other contracts:**
+   See `LendingPoolExample.sol` for how to query the reputation score on-chain.
+
+### Customization
+- Replace the simulated score in `update-reputation.js` with real AI logic as needed.
+- Deploy the oracle contract separately and use its address in your dApps.
+
+---
+

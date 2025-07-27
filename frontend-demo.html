@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=630, initial-scale=1.0">
+  <title>Reputation Oracle Demo</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 0; }
+    .container { max-width: 400px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 32px; }
+    h2 { text-align: center; }
+    input, button { width: 100%; padding: 10px; margin: 8px 0; border-radius: 4px; border: 1px solid #ccc; }
+    button { background: #007bff; color: #fff; border: none; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    .score { font-size: 1.2em; text-align: center; margin-top: 16px; }
+    .error { color: #c00; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Reputation Oracle Demo</h2>
+    <button id="connectBtn">Connect MetaMask</button>
+    <input type="text" id="addressInput" placeholder="Enter user address" />
+    <button id="getScoreBtn">Get Reputation Score</button>
+    <div class="score" id="score"></div>
+    <div class="error" id="error"></div>
+  </div>
+  <script>
+    // Replace with your deployed ReputationOracle contract address
+    const ORACLE_ADDRESS = "0xYourOracleAddressHere";
+    const ORACLE_ABI = [
+      "function getReputation(address user) external view returns (uint256)"
+    ];
+
+    let provider, signer, contract;
+
+    document.getElementById('connectBtn').onclick = async () => {
+      if (window.ethereum) {
+        try {
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          provider = new ethers.providers.Web3Provider(window.ethereum);
+          signer = provider.getSigner();
+          contract = new ethers.Contract(ORACLE_ADDRESS, ORACLE_ABI, provider);
+          document.getElementById('error').textContent = '';
+          document.getElementById('connectBtn').textContent = 'Connected!';
+        } catch (err) {
+          document.getElementById('error').textContent = 'Connection rejected.';
+        }
+      } else {
+        document.getElementById('error').textContent = 'MetaMask not found.';
+      }
+    };
+
+    document.getElementById('getScoreBtn').onclick = async () => {
+      const addr = document.getElementById('addressInput').value.trim();
+      document.getElementById('score').textContent = '';
+      document.getElementById('error').textContent = '';
+      if (!ethers.utils.isAddress(addr)) {
+        document.getElementById('error').textContent = 'Invalid address.';
+        return;
+      }
+      if (!contract) {
+        document.getElementById('error').textContent = 'Please connect MetaMask first.';
+        return;
+      }
+      try {
+        const score = await contract.getReputation(addr);
+        document.getElementById('score').textContent = `Reputation Score: ${score}`;
+      } catch (err) {
+        document.getElementById('error').textContent = 'Error fetching score.';
+      }
+    };
+  </script>
+</body>
+</html> 

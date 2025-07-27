@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Credential NFT - Gig Worker Lending Pool</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            padding: 40px;
+        }
+        
+        .card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-weight: 500;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+        
+        .nft-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        .nft-card:hover {
+            border-color: #4facfe;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.15);
+        }
+        
+        .nft-info {
+            margin-bottom: 15px;
+        }
+        
+        .nft-info strong {
+            color: #2c3e50;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4facfe;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .wallet-info {
+            background: #e8f4fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #4facfe;
+        }
+        
+        .rating {
+            color: #ffc107;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Professional Credential NFT</h1>
+            <p>AI-Driven NFT-backed Micro-Lending Pool for Gig Workers</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="wallet-info">
+                <h3>Wallet Connection Status</h3>
+                <p id="walletStatus">Not connected</p>
+                <p id="contractStatus">Contract not loaded</p>
+            </div>
+            
+            <button class="btn" onclick="connectWallet()">Connect Wallet</button>
+            <button class="btn" onclick="loadContract()">Load Contract</button>
+            
+            <div class="grid">
+                <div class="card">
+                    <h2>Deploy Contract</h2>
+                    <p>Deploy the Professional Credential NFT contract to the local network.</p>
+                    <button class="btn" onclick="deployContract()">Deploy Contract</button>
+                    <div id="deployStatus"></div>
+                </div>
+                
+                <div class="card">
+                    <h2>Whitelist Client</h2>
+                    <div class="form-group">
+                        <label for="clientAddress">Client Address:</label>
+                        <input type="text" id="clientAddress" placeholder="0x...">
+                    </div>
+                    <button class="btn" onclick="whitelistClient()">Whitelist Client</button>
+                    <div id="whitelistStatus"></div>
+                </div>
+                
+                <div class="card">
+                    <h2>Mint Credential NFT</h2>
+                    <div class="form-group">
+                        <label for="gigWorkerAddress">Gig Worker Address:</label>
+                        <input type="text" id="gigWorkerAddress" placeholder="0x...">
+                    </div>
+                    <div class="form-group">
+                        <label for="projectName">Project Name:</label>
+                        <input type="text" id="projectName" placeholder="Logo Design for Acme Corp">
+                    </div>
+                    <div class="form-group">
+                        <label for="projectDescription">Project Description:</label>
+                        <textarea id="projectDescription" placeholder="Credential NFT for completed project..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="projectDetails">Project Details:</label>
+                        <input type="text" id="projectDetails" placeholder="Logo design, branding, and delivery...">
+                    </div>
+                    <div class="form-group">
+                        <label for="paymentAmount">Payment Amount:</label>
+                        <input type="text" id="paymentAmount" placeholder="500 USDC">
+                    </div>
+                    <div class="form-group">
+                        <label for="clientRating">Client Rating (1-5):</label>
+                        <select id="clientRating">
+                            <option value="5">5 - Excellent</option>
+                            <option value="4">4 - Very Good</option>
+                            <option value="3">3 - Good</option>
+                            <option value="2">2 - Fair</option>
+                            <option value="1">1 - Poor</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="clientName">Client Name:</label>
+                        <input type="text" id="clientName" placeholder="Acme Corp">
+                    </div>
+                    <button class="btn" onclick="mintCredential()">Mint Credential</button>
+                    <div id="mintStatus"></div>
+                </div>
+                
+                <div class="card">
+                    <h2>View NFT Details</h2>
+                    <div class="form-group">
+                        <label for="tokenId">Token ID:</label>
+                        <input type="number" id="tokenId" placeholder="0">
+                    </div>
+                    <button class="btn" onclick="viewNFT()">View NFT</button>
+                    <div id="nftDetails"></div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Minted NFTs</h2>
+                <button class="btn" onclick="loadAllNFTs()">Load All NFTs</button>
+                <div id="nftList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let provider;
+        let signer;
+        let contract;
+        let contractAddress;
+        
+        const contractABI = [
+            "constructor()",
+            "function nextTokenId() view returns (uint256)",
+            "function whitelistedClients(address) view returns (bool)",
+            "function setWhitelistedClient(address client, bool status)",
+            "function mintCredential(address to, string memory tokenURI) returns (uint256)",
+            "function tokenURI(uint256 tokenId) view returns (string)",
+            "function ownerOf(uint256 tokenId) view returns (address)",
+            "function balanceOf(address owner) view returns (uint256)",
+            "event CredentialMinted(address indexed to, uint256 indexed tokenId, string tokenURI)",
+            "event ClientWhitelisted(address indexed client, bool status)"
+        ];
+        
+        async function connectWallet() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    signer = provider.getSigner();
+                    const address = await signer.getAddress();
+                    document.getElementById('walletStatus').innerHTML = `Connected: ${address.substring(0, 6)}...${address.substring(38)}`;
+                    showStatus('walletStatus', 'Wallet connected successfully!', 'success');
+                } catch (error) {
+                    showStatus('walletStatus', 'Failed to connect wallet: ' + error.message, 'error');
+                }
+            } else {
+                showStatus('walletStatus', 'Please install MetaMask!', 'error');
+            }
+        }
+        
+        async function loadContract() {
+            if (!contractAddress) {
+                showStatus('contractStatus', 'Please deploy the contract first!', 'error');
+                return;
+            }
+            
+            if (!signer) {
+                showStatus('contractStatus', 'Please connect wallet first!', 'error');
+                return;
+            }
+            
+            try {
+                contract = new ethers.Contract(contractAddress, contractABI, signer);
+                document.getElementById('contractStatus').innerHTML = `Contract loaded: ${contractAddress.substring(0, 6)}...${contractAddress.substring(38)}`;
+                showStatus('contractStatus', 'Contract loaded successfully!', 'success');
+            } catch (error) {
+                showStatus('contractStatus', 'Failed to load contract: ' + error.message, 'error');
+            }
+        }
+        
+        async function deployContract() {
+            if (!signer) {
+                showStatus('deployStatus', 'Please connect wallet first!', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('deployStatus', 'Deploying contract...', 'info');
+                
+                const contractBytecode = "0x608060405234801561001057600080fd5b50604051806040016040528060148152602001732837b33732b9b9b4b7b730b61021b932b234b33a60611b8152506040518060400160405280600581526020016450434e465460d81b815250816000908051906020019061007392919061008e565b50805161008790600190602084019061008e565b5050610171565b82805461009a90610134565b90600052602060002090601f0160209004810192826100bc5760008555610102565b82601f106100d557805160ff1916838001178555610102565b82800160010185558215610102579182015b828111156101025782518255916020019190600101906100e7565b5061010e929150610112565b5090565b5b8082111561010e5760008155600101610113565b600181811c9082168061014857607f821691505b6020821081141561016957634e487b7160e01b600052602260045260246000fd5b50919050565b610b8f80610180600039600f3fe608060405234801561001057600080fd5b50600436106100885760003560e01c806370a082311161005b57806370a08231146101155780638da5cb5b1461013557806395d89b411461014657806399e0dd7c1461014e57600080fd5b806306fdde031461008d578063081812fc146100ab578063095ea7b3146100d657806323b872dd146100eb575b600080fd5b610095610161565b6040516100a29190610a0d565b60405180910390f35b6100be6100b9366004610a60565b6101f3565b6040516001600160a01b0390911681526020016100a2565b6100e96100e4366004610a95565b61028d565b005b6100e96100f9366004610abf565b6103a3565b61010d610112366004610a60565b6103d4565b6040519081526020016100a2565b61010d610123366004610afb565b61046b565b6006546001600160a01b03166100be565b6100956104f2565b6100e961015c366004610b16565b610501565b60606000805461017090610b88565b80601f016020809104026020016040519081016040528092919081815260200182805461019c90610b88565b80156101e95780601f106101be576101008083540402835291602001916101e9565b820191906000526020600020905b8154815290600101906020018083116101cc57829003601f168201915b5050505050905090565b6000818152600260205260408120546001600160a01b03166102715760405162461bcd60e51b815260206004820152602c60248201527f4552433732313a20617070726f76656420717565727920666f72206e6f6e657860448201526b34b9ba32b73a103a37b5b2b760a11b60648201526084015b60405180910390fd5b506000908152600460205260409020546001600160a01b031690565b600061029882610537565b9050806001600160a01b0316836001600160a01b031614156103065760405162461bcd60e51b815260206004820152602160248201527f4552433732313a20617070726f76616c20746f2063757272656e74206f776e656044820152603960f91b6064820152608401610268565b336001600160a01b0382161480610322575061032281336105ae565b6103945760405162461bcd60e51b815260206004820152603860248201527f4552433732313a20617070726f76652063616c6c6572206973206e6f74206f7760448201527f6e6572206e6f7220617070726f76656420666f7220616c6c00000000000000006064820152608401610268565b61039e838361062c565b505050565b6103ad338261069a565b6103c95760405162461bcd60e51b815260040161026890610bc3565b61039e838383610791565b60006103df82610537565b5192915050565b60006001600160a01b0382166104515760405162461bcd60e51b815260206004820152602a60248201527f4552433732313a2062616c616e636520717565727920666f72207468652070656044820152693932b9b0b6329037bbb760b11b6064820152608401610268565b506001600160a01b031660009081526003602052604090205490565b60606001805461017090610b88565b6006546001600160a01b0316331461052b5760405162461bcd60e51b815260040161026890610c14565b61053582826108d8565b5050565b6000818152600260205260408120546001600160a01b0316806105a65760405162461bcd60e51b815260206004820152602960248201527f4552433732313a206f776e657220717565727920666f72206e6f6e657869737460448201526832b73a103a37b5b2b760b91b6064820152608401610268565b90505b919050565b6001600160a01b03918216600090815260056020908152604080832093909416825291909152205460ff1690565b600081815260046020526040902080546001600160a01b0319166001600160a01b038416908117909155819061066182610537565b6001600160a01b03167f8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b92560405160405180910390a45050565b6000818152600260205260408120546001600160a01b03166107135760405162461bcd60e51b815260206004820152602c60248201527f4552433732313a206f70657261746f7220717565727920666f72206e6f6e657860448201526b34b9ba32b73a103a37b5b2b760a11b6064820152608401610268565b600061071e83610537565b9050806001600160a01b0316846001600160a01b031614806107595750836001600160a01b031661074e846101f3565b6001600160a01b0316145b8061078957506001600160a01b0380821660009081526005602090815260408083209388168352929052205460ff165b949350505050565b826001600160a01b03166107a482610537565b6001600160a01b03161461080c5760405162461bcd60e51b815260206004820152602960248201527f4552433732313a207472616e73666572206f6620746f6b656e2074686174206960448201526839903737ba1037bbb760b91b6064820152608401610268565b6001600160a01b03821661086e5760405162461bcd60e51b8152602060048201526024808201527f4552433732313a207472616e7366657220746f20746865207a65726f206164646044820152637265737360e01b6064820152608401610268565b61087960008261062c565b6001600160a01b03831660009081526003602052604081208054600192906108a2908490610c49565b90915550506001600160a01b03821660009081526003602052604081208054600192906108d0908490610c60565b909155505050565b6001600160a01b03821661092e5760405162461bcd60e51b815260206004820181905260248201527f4552433732313a206d696e7420746f20746865207a65726f20616464726573736044820152606401610268565b6000818152600260205260409020546001600160a01b0316156109935760405162461bcd60e51b815260206004820152601c60248201527f4552433732313a20746f6b656e20616c7265616479206d696e746564000000006044820152606401610268565b6001600160a01b03821660009081526003602052604081208054600192906109bc908490610c60565b909155505060008181526002602052604080822080546001600160a01b0319166001600160a01b03861690811790915590518392907fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef908290a45050565b600060208083528351808285015260005b81811015610a3a57858101830151858201604001528201610a1e565b81811115610a4c576000604083870101525b50601f01601f1916929092016040019392505050565b600060208284031215610a7257600080fd5b5035919050565b80356001600160a01b03811681146105a957600080fd5b60008060408385031215610aa857600080fd5b610ab183610a79565b946020939093013593505050565b600080600060608486031215610ad457600080fd5b610add84610a79565b9250610aeb60208501610a79565b9150604084013590509250925092565b600060208284031215610b0d57600080fd5b61046b82610a79565b60008060408385031215610b2957600080fd5b610b3283610a79565b91506020830135801515811481146105a957600080fd5b600181811c90821680610b5d57607f821691505b60208210811415610b7e57634e487b7160e01b600052602260045260246000fd5b50919050565b600060208284031215610b9657600080fd5b5051919050565b634e487b7160e01b600052601160045260246000fd5b600082821015610bc557610bc5610b9d565b500390565b60008219821115610bdd57610bdd610b9d565b50019056fea2646970667358221220a7c5e5c5a5c5e5c5e5c5e5c5e5c5e5c5e5c5e5c5e5c5e5c5e5c5e5c5e5c5e564736f6c63430008090033";
+                
+                const factory = new ethers.ContractFactory(contractABI, contractBytecode, signer);
+                const deployedContract = await factory.deploy();
+                await deployedContract.deployed();
+                
+                contractAddress = deployedContract.address;
+                contract = deployedContract;
+                
+                showStatus('deployStatus', `Contract deployed successfully at: ${contractAddress}`, 'success');
+                document.getElementById('contractStatus').innerHTML = `Contract loaded: ${contractAddress.substring(0, 6)}...${contractAddress.substring(38)}`;
+            } catch (error) {
+                showStatus('deployStatus', 'Failed to deploy contract: ' + error.message, 'error');
+            }
+        }
+        
+        async function whitelistClient() {
+            if (!contract) {
+                showStatus('whitelistStatus', 'Please load contract first!', 'error');
+                return;
+            }
+            
+            const clientAddress = document.getElementById('clientAddress').value;
+            if (!clientAddress) {
+                showStatus('whitelistStatus', 'Please enter client address!', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('whitelistStatus', 'Whitelisting client...', 'info');
+                const tx = await contract.setWhitelistedClient(clientAddress, true);
+                await tx.wait();
+                showStatus('whitelistStatus', `Client ${clientAddress} whitelisted successfully!`, 'success');
+            } catch (error) {
+                showStatus('whitelistStatus', 'Failed to whitelist client: ' + error.message, 'error');
+            }
+        }
+        
+        async function mintCredential() {
+            if (!contract) {
+                showStatus('mintStatus', 'Please load contract first!', 'error');
+                return;
+            }
+            
+            const gigWorkerAddress = document.getElementById('gigWorkerAddress').value;
+            const projectName = document.getElementById('projectName').value;
+            const projectDescription = document.getElementById('projectDescription').value;
+            const projectDetails = document.getElementById('projectDetails').value;
+            const paymentAmount = document.getElementById('paymentAmount').value;
+            const clientRating = document.getElementById('clientRating').value;
+            const clientName = document.getElementById('clientName').value;
+            
+            if (!gigWorkerAddress || !projectName) {
+                showStatus('mintStatus', 'Please fill in required fields!', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('mintStatus', 'Creating metadata and minting NFT...', 'info');
+                
+                // Create metadata
+                const metadata = {
+                    name: projectName,
+                    description: projectDescription || `Credential NFT for completed project: ${projectName}`,
+                    project_details: projectDetails || "Project completed successfully",
+                    completion_date: new Date().toISOString().split('T')[0],
+                    payment_amount: paymentAmount || "Not specified",
+                    client_rating: parseInt(clientRating),
+                    client: clientName || "Anonymous Client",
+                    freelancer: gigWorkerAddress
+                };
+                
+                // For demo purposes, we'll use a data URI instead of IPFS
+                const metadataURI = `data:application/json;base64,${btoa(JSON.stringify(metadata))}`;
+                
+                const tx = await contract.mintCredential(gigWorkerAddress, metadataURI);
+                const receipt = await tx.wait();
+                
+                // Find the minted token ID from events
+                const event = receipt.events.find(e => e.event === 'CredentialMinted');
+                const tokenId = event ? event.args.tokenId.toString() : 'Unknown';
+                
+                showStatus('mintStatus', `NFT minted successfully! Token ID: ${tokenId}`, 'success');
+                
+                // Clear form
+                document.getElementById('gigWorkerAddress').value = '';
+                document.getElementById('projectName').value = '';
+                document.getElementById('projectDescription').value = '';
+                document.getElementById('projectDetails').value = '';
+                document.getElementById('paymentAmount').value = '';
+                document.getElementById('clientName').value = '';
+                
+            } catch (error) {
+                showStatus('mintStatus', 'Failed to mint NFT: ' + error.message, 'error');
+            }
+        }
+        
+        async function viewNFT() {
+            if (!contract) {
+                showStatus('nftDetails', 'Please load contract first!', 'error');
+                return;
+            }
+            
+            const tokenId = document.getElementById('tokenId').value;
+            if (tokenId === '') {
+                showStatus('nftDetails', 'Please enter token ID!', 'error');
+                return;
+            }
+            
+            try {
+                const tokenURI = await contract.tokenURI(tokenId);
+                const owner = await contract.ownerOf(tokenId);
+                
+                let metadataHTML = `
+                    <div class="nft-card">
+                        <div class="nft-info"><strong>Token ID:</strong> ${tokenId}</div>
+                        <div class="nft-info"><strong>Owner:</strong> ${owner}</div>
+                        <div class="nft-info"><strong>Token URI:</strong> ${tokenURI.substring(0, 50)}...</div>
+                `;
+                
+                // Try to parse metadata if it's a data URI
+                if (tokenURI.startsWith('data:application/json;base64,')) {
+                    try {
+                        const base64Data = tokenURI.split(',')[1];
+                        const metadata = JSON.parse(atob(base64Data));
+                        
+                        metadataHTML += `
+                            <div class="nft-info"><strong>Project:</strong> ${metadata.name}</div>
+                            <div class="nft-info"><strong>Description:</strong> ${metadata.description}</div>
+                            <div class="nft-info"><strong>Client:</strong> ${metadata.client}</div>
+                            <div class="nft-info"><strong>Payment:</strong> ${metadata.payment_amount}</div>
+                            <div class="nft-info"><strong>Rating:</strong> <span class="rating">${'★'.repeat(metadata.client_rating)}</span></div>
+                            <div class="nft-info"><strong>Completion Date:</strong> ${metadata.completion_date}</div>
+                        `;
+                    } catch (e) {
+                        console.log('Could not parse metadata:', e);
+                    }
+                }
+                
+                metadataHTML += '</div>';
+                document.getElementById('nftDetails').innerHTML = metadataHTML;
+                
+            } catch (error) {
+                showStatus('nftDetails', 'Failed to load NFT: ' + error.message, 'error');
+            }
+        }
+        
+        async function loadAllNFTs() {
+            if (!contract) {
+                showStatus('nftList', 'Please load contract first!', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('nftList', 'Loading all NFTs...', 'info');
+                
+                const nextTokenId = await contract.nextTokenId();
+                const totalNFTs = nextTokenId.toNumber();
+                
+                if (totalNFTs === 0) {
+                    document.getElementById('nftList').innerHTML = '<p>No NFTs minted yet.</p>';
+                    return;
+                }
+                
+                let nftListHTML = '<div class="grid">';
+                
+                for (let i = 0; i < totalNFTs; i++) {
+                    try {
+                        const owner = await contract.ownerOf(i);
+                        const tokenURI = await contract.tokenURI(i);
+                        
+                        nftListHTML += `
+                            <div class="nft-card">
+                                <div class="nft-info"><strong>Token ID:</strong> ${i}</div>
+                                <div class="nft-info"><strong>Owner:</strong> ${owner.substring(0, 6)}...${owner.substring(38)}</div>
+                        `;
+                        
+                        // Try to parse metadata if it's a data URI
+                        if (tokenURI.startsWith('data:application/json;base64,')) {
+                            try {
+                                const base64Data = tokenURI.split(',')[1];
+                                const metadata = JSON.parse(atob(base64Data));
+                                
+                                nftListHTML += `
+                                    <div class="nft-info"><strong>Project:</strong> ${metadata.name}</div>
+                                    <div class="nft-info"><strong>Client:</strong> ${metadata.client}</div>
+                                    <div class="nft-info"><strong>Payment:</strong> ${metadata.payment_amount}</div>
+                                    <div class="nft-info"><strong>Rating:</strong> <span class="rating">${'★'.repeat(metadata.client_rating)}</span></div>
+                                `;
+                            } catch (e) {
+                                nftListHTML += `<div class="nft-info"><strong>Metadata:</strong> Could not parse</div>`;
+                            }
+                        }
+                        
+                        nftListHTML += '</div>';
+                        
+                    } catch (error) {
+                        console.log(`Error loading NFT ${i}:`, error);
+                    }
+                }
+                
+                nftListHTML += '</div>';
+                document.getElementById('nftList').innerHTML = nftListHTML;
+                
+            } catch (error) {
+                showStatus('nftList', 'Failed to load NFTs: ' + error.message, 'error');
+            }
+        }
+        
+        function showStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.innerHTML = `<div class="status ${type}">${message}</div>`;
+            }
+        }
+        
+        // Auto-connect wallet on page load
+        window.addEventListener('load', async () => {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        await connectWallet();
+                    }
+                } catch (error) {
+                    console.log('Auto-connect failed:', error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

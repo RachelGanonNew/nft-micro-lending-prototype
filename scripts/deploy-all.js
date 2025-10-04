@@ -12,7 +12,7 @@ async function main() {
   await nftContract.deployed();
   console.log("ProfessionalCredentialNFT deployed to:", nftContract.address);
 
-  // Deploy ReputationOracle
+  // Deploy ReputationOracle with Chainlink parameters
   console.log("Deploying ReputationOracle...");
   const ReputationOracle = await hre.ethers.getContractFactory("ReputationOracle");
   const oracle = await ReputationOracle.deploy();
@@ -44,7 +44,8 @@ async function main() {
   console.log(`Deployer/Client: ${deployer.address}`);
   console.log("\nTo test the contracts, you can now run:");
   console.log(`1. npx hardhat run scripts/test-mint.js --network localhost`);
-  console.log(`2. npx hardhat run scripts/update-reputation.js --network localhost`);
+  console.log(`2. npx hardhat run scripts/request-reputation.js --network localhost`); // Updated script name
+  console.log(`3. npx hardhat run scripts/update-reputation.js --network localhost`);
 
   return {
     nftContract: nftContract.address,

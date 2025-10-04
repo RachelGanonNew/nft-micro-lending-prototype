@@ -11,15 +11,12 @@ const NFT_ABI = [
   "function tokenOfOwnerByIndex(address owner, uint256 index) view returns (uint256)",
   "function tokenURI(uint256 tokenId) view returns (string)"
 ];
-const ORACLE_ABI = [
-  "function setReputation(address user, uint256 score) external",
-  "function getReputation(address user) external view returns (uint256)",
-  "function setOracleUpdater(address updater) external"
-];
 
 async function main() {
   const [deployer, oracleUpdater, user] = await hre.ethers.getSigners();
   const provider = hre.ethers.provider;
+
+  const ORACLE_ABI = (await hre.artifacts.readArtifact("ReputationOracle")).abi;
 
   // Connect to deployed contracts
   const nft = new hre.ethers.Contract(NFT_CONTRACT_ADDRESS, NFT_ABI, provider);

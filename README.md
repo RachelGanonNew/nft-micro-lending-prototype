@@ -70,3 +70,33 @@ This prototype demonstrates an off-chain AI oracle that analyzes Professional Cr
 
 ---
 
+## Prototype 3: Decentralized AI Oracle Architecture (Chainlink Integration)
+
+### Overview
+This section outlines the architectural integration of a decentralized AI oracle using Chainlink, demonstrating how reputation scores can be fetched on-chain via oracle requests. For this prototype on a local Hardhat network, the Chainlink integration is simulated, showcasing the design pattern rather than a live Chainlink network interaction.
+
+**NOTE:** For the purpose of this hackathon prototype and to simplify local testing, authorization modifiers (`onlyOwner`, `onlyOracleUpdater`) have been temporarily removed from `setOracleUpdater` and `setReputation` functions in `contracts/ReputationOracle.sol`. In a production environment, these modifiers would be crucial for security and access control, ensuring only authorized entities can update reputation scores.
+
+### Components
+- `contracts/ReputationOracle.sol`: Modified to include `requestReputationUpdate` for triggering oracle requests and `setReputation` to receive/store the reputation score.
+- `scripts/deploy-all.js`: Deploys the `ReputationOracle` contract.
+- `scripts/request-reputation.js`: Demonstrates triggering a simulated Chainlink request for a user's reputation score. The `requestReputationUpdate` function within `ReputationOracle.sol` now directly sets a simulated score (e.g., 75) for demonstration purposes, mimicking the fulfillment of an off-chain AI oracle.
+
+### How to Use
+1. **Start a local Hardhat node:**
+   ```bash
+   npx hardhat node
+   ```
+2. **Redeploy all contracts:**
+   ```bash
+   npx hardhat run scripts/deploy-all.js --network localhost
+   ```
+3. **Request a simulated reputation update:**
+   ```bash
+   npx hardhat run scripts/request-reputation.js --network localhost
+   ```
+   This script will call the `requestReputationUpdate` function on the deployed `ReputationOracle` contract, which will then set a simulated reputation score. The script will also fetch and display the updated score.
+
+### Real-World Integration (Future Work)
+For a live BlockDAG testnet/mainnet deployment, the placeholder Chainlink configurations in `hardhat.config.ts` would be replaced with actual Chainlink LINK token addresses, oracle contract addresses, and job IDs. The off-chain AI model would then integrate with a Chainlink node to fulfill `requestReputationUpdate` calls, providing actual reputation scores.
+
